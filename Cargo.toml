@@ -1,0 +1,11 @@
+[package]
+name = "alrm"
+version = "0.1.0"
+authors = ["platipus25 <40722163+platipus25@users.noreply.github.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+structopt = "0.3.21"
+time = "0.2.26"
