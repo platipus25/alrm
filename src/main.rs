@@ -48,7 +48,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>>{
 /// Then for 24-hour format  ("%-H:%-M")
 /// Then for just an hour (%-H)
 fn parse_time(s: &str) -> Result<NaiveTime, chrono::ParseError> {
-    NaiveTime::parse_from_str(s, "%-I:%M%p")
+    NaiveTime::parse_from_str(s, "%-I:%M:%S%p")
+        .or_else(|_e| NaiveTime::parse_from_str(s, "%-I:%M%p"))
         .or_else(|_e| NaiveTime::parse_from_str(s, "%-H:%M"))
         .or_else(|e| match s.parse::<u32>() {
             Ok(hour) => match NaiveTime::from_hms_opt(hour, 0, 0) {
