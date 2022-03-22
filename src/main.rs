@@ -1,23 +1,23 @@
-use structopt::StructOpt;
 use chrono::prelude::*;
+use clap::Parser;
+use console::{Style, Term};
 use hhmmss::Hhmmss;
-use console::{ Term, Style };
 use std::thread;
 
 /// Take a time and print the time remaining until that time. If `time` has already passed today,
 /// then count to `time` tomorrow.
-#[derive(StructOpt)]
+#[derive(Parser)]
 struct Cli {
     /// The time to count down to
-    #[structopt(parse(try_from_str = parse_time))]
+    #[clap(parse(try_from_str = parse_time))]
     time: NaiveTime,
 
-    #[structopt(short = "u")]
+    #[clap(short = 'u')]
     repeat: bool,
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>>{
-    let args = Cli::from_args();
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args = Cli::parse();
     let term = Term::stdout();
 
     let mut date = Local::today();
@@ -31,11 +31,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>>{
     let yellow = Style::new().bright().yellow();
     loop {
         let time_left = date - Local::now();
-        let relative_day = if date.date() == Local::today() { "today" } else { "tomorrow" };
-        let output = format!("{} until {} {}", yellow.apply_to(time_left.hhmmss()), args.time.format("%-I:%M%P"), relative_day);
+        let relative_day = if date.date() == Local::today() {
+            "today"
+        } else {
+            "tomorrow"
+        };
+        let output = format!(
+            "{} until {} {}",
+            yellow.apply_to(time_left.hhmmss()),
+            args.time.format("%-I:%M%P"),
+            relative_day
+        );
         term.write_line(&output)?;
 
-        if !args.repeat || date < Local::now() { break }
+        if !args.repeat || date < Local::now() {
+            break;
+        }
 
         thread::sleep(std::time::Duration::from_millis(1000));
         term.clear_last_lines(1)?;
@@ -54,8 +65,8 @@ fn parse_time(s: &str) -> Result<NaiveTime, chrono::ParseError> {
         .or_else(|e| match s.parse::<u32>() {
             Ok(hour) => match NaiveTime::from_hms_opt(hour, 0, 0) {
                 Some(time) => Ok(time),
-                None => Err(e)
+                None => Err(e),
             },
-            Err(_err) => Err(e)
+            Err(_err) => Err(e),
         })
 }
