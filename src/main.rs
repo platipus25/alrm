@@ -1,19 +1,36 @@
+#![deny(missing_docs)]
+//! A quick countdown timer for your terminal.
+//!
+//! Alarms and timers are useful, but I found myself wanting to know how long I have left until an appointment or how long it is until lunch. Simply give `alrm` a time of day and it will tell you how long you have until then.
+//!
+//! Example
+//! ```bash
+//! alrm 9       # prints the time until 9:00 am
+//! alrm 9:30pm  # prints the time until 9:30 pm
+//! alrm 9:00 -u # counts down to 9:00 am and then exits
+//! ```
+
 use chrono::prelude::*;
 use clap::Parser;
 use console::{Style, Term};
 use hhmmss::Hhmmss;
 use std::thread;
 
-/// Take a time and print the time remaining until that time. If `time` has already passed today,
-/// then count to `time` tomorrow.
-#[derive(Parser)]
+/// A quick countdown timer
+#[derive(Parser, Debug)]
+#[clap(version)]
 struct Cli {
-    /// The time to count down to
-    #[clap(parse(try_from_str = parse_time))]
+    /// time to count down to
+    #[clap(parse(try_from_str = parse_time), long_help = "Count down to TIME. If TIME has already passed today, then count down the TIME tomorrow.")]
     time: NaiveTime,
 
-    #[clap(short = 'u')]
-    repeat: bool,
+    /// update console countdown
+    #[clap(
+        long,
+        short,
+        long_help = "Update the countdown until once the time has passed and then exit"
+    )]
+    update: bool,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -44,7 +61,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         );
         term.write_line(&output)?;
 
-        if !args.repeat || date < Local::now() {
+        if !args.update || date < Local::now() {
             break;
         }
 
@@ -55,9 +72,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 /// Parse a time from a string.
-/// First look for 12 hour format (%-I:%-M%p)
-/// Then for 24-hour format  ("%-H:%-M")
-/// Then for just an hour (%-H)
+///
+/// First look for 12 hour format (%I:%MM%p)
+/// Then for 24-hour format  (%H:%MM)
+/// Then for just an hour (%H)
 fn parse_time(s: &str) -> Result<NaiveTime, chrono::ParseError> {
     NaiveTime::parse_from_str(s, "%-I:%M:%S%p")
         .or_else(|_e| NaiveTime::parse_from_str(s, "%-I:%M%p"))
