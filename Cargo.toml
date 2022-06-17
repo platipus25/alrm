@@ -1,6 +1,6 @@
 [package]
 name = "alrm"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["platipus25 <40722163+platipus25@users.noreply.github.com>"]
 edition = "2021"
 
@@ -11,3 +11,7 @@ clap = { version = "3.1.6", features = ["derive"] }
 chrono = "0.4"
 hhmmss = "0.1"
 console = "0.14.1"
+regex = "1.5.6"
+lazy_static = "1.4.0"
+range_check = "0.2.0"
+ariadne = "0.1.5"
