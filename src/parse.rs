@@ -120,7 +120,8 @@ impl fmt::Display for TimeParseError {
                 .with_message(format!("{} field is out of range", field))
                 .with_label(Label::new(section.range()).with_message(format!(
                     "this is not in the proper range ({}) for {}",
-                    Color::White.style().bold().paint(&err.allowed_range), green.paint(field)
+                    Color::White.style().bold().paint(&err.allowed_range),
+                    green.paint(field)
                 ))),
             Self::InvalidFormat(field, section) => {
                 if matches!(field, Field::Overall) {
@@ -141,9 +142,7 @@ impl fmt::Display for TimeParseError {
             Self::Overconstrained { hour, pm } => {
                 builder
                     .with_message("Time is overconstrained")
-                    .with_label(
-                        Label::new(hour.range()).with_message("this is already 24-hour"),
-                    )
+                    .with_label(Label::new(hour.range()).with_message("this is already 24-hour"))
                     .with_label(
                         Label::new(pm.range()).with_message("so this is too much information"),
                     )
@@ -234,7 +233,15 @@ pub fn opinionated_time_parsing(s: &str) -> Result<NaiveTime, TimeParseError> {
         None => None,
         Some(pm) => Some(match pm.as_str().to_ascii_lowercase().as_str() {
             "am" => Duration::zero(),
-            "pm" => Duration::hours(12),
+            "pm" => {
+                if hour == 12 {
+                    // 12 pm is already correct
+                    // we don't need to do anything to convert to 24-hour time
+                    Duration::zero()
+                } else {
+                    Duration::hours(12)
+                }
+            }
             _ => {
                 return Err(TimeParseError::InvalidFormat(
                     Field::Pm,
@@ -244,7 +251,7 @@ pub fn opinionated_time_parsing(s: &str) -> Result<NaiveTime, TimeParseError> {
         }),
     };
 
-    if hour >= 12 && pm.is_some() {
+    if hour > 12 && pm.is_some() {
         return Err(TimeParseError::Overconstrained {
             hour: StringSection::new(s, cap.name("hour").unwrap().range()),
             pm: StringSection::new(s, cap.name("pm").unwrap().range()),
@@ -283,7 +290,6 @@ fn parse_field(
             TimeParseError::OutOfRange(field, StringSection::new(s, capture.range()), err)
         })
 }
-
 
 #[test]
 fn time_parsing_happy_paths() {
@@ -353,8 +359,7 @@ fn time_parsing_edge_cases() {
     );
     println!(
         "{}",
-        opinionated_time_parsing("63")
-            .expect_err("63 hours is greater than maximum of 23 hours")
+        opinionated_time_parsing("63").expect_err("63 hours is greater than maximum of 23 hours")
     );
     println!(
         "{}",

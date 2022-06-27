@@ -3,9 +3,9 @@
 
 ### Usage
 ```bash
-alrm 9       # prints the time until 9:00 am
-alrm 9:30pm  # prints the time until 9:30 pm
-alrm 9:00 -u # counts down to 9:00 am and then exits
+alrm 21       # prints the time until 9:00 pm
+alrm 9:30 pm  # prints the time until 9:30 pm
+alrm 9:00 -u  # counts down to 9:00 am and then exits
 ```
 
 If the given time has already passed today, alrm will start counting down to the time that will occur tomorrow.

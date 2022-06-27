@@ -12,12 +12,12 @@
 
 mod parse;
 
+use crate::parse::opinionated_time_parsing;
 use chrono::Local;
 use clap::Parser;
 use console::{Style, Term};
 use hhmmss::Hhmmss;
 use std::thread;
-use crate::parse::opinionated_time_parsing;
 
 /// A quick countdown timer
 #[derive(Parser, Debug)]
